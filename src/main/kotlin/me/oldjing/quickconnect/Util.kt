@@ -1,27 +1,11 @@
 package me.oldjing.quickconnect
 
-object Util {
-  fun isQuickConnectId(host: String?): Boolean {
-    return host != null
-        && host.indexOf('.') < 0
-        && host.indexOf(':') < 0
-  }
+fun String?.isQuickConnectId(): Boolean {
+  return this != null
+      && indexOf('.') < 0
+      && indexOf(':') < 0
+}
 
-  fun isEmpty(obj: Any?): Boolean {
-    if (obj == null) {
-      return true
-    }
-    return when (obj) {
-      is String -> {
-        obj.length == 0
-      }
-      is Collection<*> -> {
-        obj.isEmpty()
-      }
-      is Array<*> -> {
-        obj.isEmpty()
-      }
-      else -> false
-    }
-  }
+fun String?.isEmptyOrEscaped(escaped: String): Boolean {
+  return isNullOrEmpty() || this == escaped
 }

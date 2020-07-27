@@ -29,7 +29,7 @@ class QuickConnectInterceptor : Interceptor {
     val isHttps: Boolean = requestUrl.isHttps
     var host: String = requestUrl.host()
 
-    if (Util.isQuickConnectId(host)) {
+    if (host.isQuickConnectId()) {
       val serverID = host
       val id = if (isHttps) ID_DSM_PORTAL_HTTPS else ID_DSM_PORTAL
 

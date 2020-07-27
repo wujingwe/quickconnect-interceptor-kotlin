@@ -61,8 +61,8 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
 
   @Throws(IOException::class)
   fun resolve(serverID: String, id: String): RelayCookie {
-    if (!Util.isQuickConnectId(serverID)) {
-      throw IllegalArgumentException("serverID isn't a Quick Connect ID")
+    check(serverID.isQuickConnectId()) {
+      "serverID isn't a Quick Connect ID"
     }
 
     val relayManager = RelayHandler.getDefault() as RelayManager
@@ -178,12 +178,12 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
     val hostService = ExecutorCompletionService<String>(executor)
     val hostCount = AtomicInteger(0)
     val ddns = serverJson.ddns
-    if (!Util.isEmpty(ddns) && ddns != "NULL") {
+    if (!ddns.isEmptyOrEscaped("NULL")) {
       hostService.submit(newPingCallable(client, ddns, port))
       hostCount.incrementAndGet()
     }
     val fqdn = serverJson.fqdn
-    if (!Util.isEmpty(fqdn) && fqdn != "NULL") {
+    if (!ddns.isEmptyOrEscaped("NULL")) {
       hostService.submit(newPingCallable(client, fqdn, port))
       hostCount.incrementAndGet()
     }
@@ -193,12 +193,12 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
     val externalCount = AtomicInteger(0)
     if (serverJson.external != null) {
       val ip = serverJson.external.ip
-      if (!Util.isEmpty(ip)) {
+      if (ip.isNotEmpty()) {
         externalService.submit(newPingCallable(client, ip, if (externalPort != 0) externalPort else port))
         externalCount.incrementAndGet()
       }
       val ipv6 = serverJson.external.ipv6
-      if (!Util.isEmpty(ipv6) && ipv6 != "::") {
+      if (!ipv6.isEmptyOrEscaped("::")) {
         externalService.submit(newPingCallable(client, "[$ipv6]", if (externalPort != 0) externalPort else port))
         externalCount.incrementAndGet()
       }
@@ -209,7 +209,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
         val future = internalService.take()
         if (future != null) {
           val host = future.get()
-          if (!Util.isEmpty(host)) {
+          if (host.isNotEmpty()) {
             return requestUrl.newBuilder().host(host).port(port).build()
           }
         }
@@ -223,7 +223,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
         val future = hostService.take()
         if (future != null) {
           val host = future.get()
-          if (!Util.isEmpty(host)) {
+          if (host.isNotEmpty()) {
             return requestUrl.newBuilder().host(host).port(port).build()
           }
         }
@@ -237,7 +237,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
         val future = externalService.take()
         if (future != null) {
           val host = future.get()
-          if (!Util.isEmpty(host)) {
+          if (host.isNotEmpty()) {
             return requestUrl.newBuilder().host(host).port(port).build()
           }
         }
@@ -253,7 +253,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
   }
 
   private fun pingTunnel(serviceJson: ServiceJson): HttpUrl? {
-    if (Util.isEmpty(serviceJson.relay_ip) || serviceJson.relay_port == 0) {
+    if (serviceJson.relay_ip.isNullOrEmpty() || serviceJson.relay_port == 0) {
       return null
     }
 
@@ -274,7 +274,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
       val future = service.take()
       if (future != null) {
         val host = future.get()
-        if (!Util.isEmpty(host) && relayPort != null) {
+        if (host.isNotEmpty() && relayPort != null) {
           return requestUrl.newBuilder().host(host).port(relayPort).build()
         }
       }
@@ -320,7 +320,7 @@ class QuickConnectResolver(private val requestUrl: HttpUrl) {
   }
 
   fun requestTunnel(infoJson: ServerInfoJson?, serverID: String, id: String): ServerInfoJson? {
-    if (infoJson?.env == null || Util.isEmpty(infoJson.env.control_host)) {
+    if (infoJson?.env == null || infoJson.env.control_host.isEmpty()) {
       return null
     }
 
