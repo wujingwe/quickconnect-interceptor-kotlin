@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class Test {
+class QuickConnectResolverTest {
 
 	@get:Rule
 	var server = MockWebServer()
@@ -28,29 +28,6 @@ class Test {
 	val gson = Gson()
 
 	@Test
-	@Throws(Exception::class)
-	fun realConnection() {
-		val client = OkHttpClient.Builder()
-				.addInterceptor(QuickConnectInterceptor())
-				.build()
-
-		val quickConnectId = "demo"
-		val request = Request.Builder()
-				.url(HttpUrl.parse("http://$quickConnectId/webman/pingpong.cgi?action=cors"))
-				.build();
-		try {
-			val response = client.newCall(request).execute()
-			val responseString = response.body().string()
-			println(responseString)
-			assertNotNull(responseString)
-		} catch (ex: IOException) {
-			ex.printStackTrace();
-			assertNull(ex);
-		}
-	}
-
-	@Test
-	@Throws(Exception::class)
 	fun serverInfo() {
 		val interfaceJson = InterfaceJson("localhost", null, "mask", "eth0")
 		val externalJson = ExternalJson("external", "external_ipv6")
@@ -69,7 +46,6 @@ class Test {
 	}
 
 	@Test
-	@Throws(Exception::class)
 	fun pingDSM() {
 		val pingPongJson = PingPongJson(true, false, "ezid", true)
 		server.enqueue(MockResponse().setBody(gson.toJson(pingPongJson)))
@@ -87,7 +63,6 @@ class Test {
 	}
 
 	@Test
-	@Throws(Exception::class)
 	fun requestTunnel() {
 		val interfaceJson = InterfaceJson("localhost", null, "mask", "eth0")
 		val externalJson = ExternalJson("external", "external_ipv6")
@@ -106,7 +81,6 @@ class Test {
 	}
 
 	@Test
-	@Throws(Exception::class)
 	fun addRelayCookie() {
 		val relayManager = RelayManager()
 		RelayHandler.setDefault(relayManager)

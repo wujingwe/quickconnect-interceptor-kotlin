@@ -15,10 +15,9 @@ class QuickConnectInterceptor : Interceptor {
 	val ID_DSM_PORTAL = "dsm_portal";
 	val ID_DSM_PORTAL_HTTPS = "dsm_portal_https"
 
-	private val relayManager: RelayManager
+	private val relayManager: RelayManager = RelayManager()
 
 	init {
-		relayManager = RelayManager()
 		RelayHandler.setDefault(relayManager)
 	}
 
@@ -58,7 +57,7 @@ class QuickConnectInterceptor : Interceptor {
 			request = request.newBuilder()
 					.url(url)
 					.build();
-			println("Resolved url: " + url)
+			println("Resolved url: $url")
 		}
 		return chain.proceed(request)
 	}

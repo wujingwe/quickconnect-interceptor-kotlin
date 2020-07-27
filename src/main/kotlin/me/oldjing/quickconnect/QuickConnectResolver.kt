@@ -11,7 +11,6 @@ import me.oldjing.quickconnect.json.ServerInfoJson.ServiceJson
 import okhttp3.*
 import okhttp3.OkHttpClient.Builder
 import java.io.IOException
-import java.io.Reader
 import java.security.KeyManagementException
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -27,14 +26,12 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-class QuickConnectResolver(val requestUrl: HttpUrl) {
-	private val builder: Builder
+class QuickConnectResolver(private val requestUrl: HttpUrl) {
+	private val builder: Builder = Builder()
 	private val gson: Gson
-
-	val context = SSLContext.getInstance("TLS")
+	private val context = SSLContext.getInstance("TLS")
 
 	init {
-		builder = Builder()
 
 		try {
 			val trustManagers = arrayOf<TrustManager>(object : X509TrustManager {
@@ -52,7 +49,7 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 			})
 			context.init(null, trustManagers, SecureRandom())
 			builder.sslSocketFactory(context.socketFactory)
-					.hostnameVerifier { s, sslSession ->
+					.hostnameVerifier { _, _ ->
 						// since most DSM doesn't have valid certificate, ignore verifying hostname
 						true
 					}
@@ -75,7 +72,7 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 			relayManager.put(serverID, cookie)
 		}
 
-		var serverUrl = HttpUrl.parse("http://global.quickconnect.to/Serv.php")
+		val serverUrl = HttpUrl.parse("http://global.quickconnect.to/Serv.php")
 		var infoJson: ServerInfoJson? = getServerInfo(serverUrl, serverID, id)
 
 		// ping DSM directly
@@ -127,23 +124,19 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 				.build()
 		val response = client.newCall(request).execute()
 		val reader = response.body().charStream()
-		var serverInfoJson: ServerInfoJson?
-		try {
-			serverInfoJson = gson.fromJson<ServerInfoJson>(reader, ServerInfoJson::class.java)
-		} finally {
-			reader?.close()
-		}
-
-		if (serverInfoJson != null) {
-			val server = serverInfoJson.server
-			if (server != null) {
-				return serverInfoJson
-			}
-			val sites = serverInfoJson.sites
-			if (sites != null && !sites.isEmpty()) {
-				val site = sites[0]
-				val siteUrl = HttpUrl.Builder().scheme("http").host(site).addPathSegment("Serv.php").build()
-				return getServerInfo(siteUrl, serverID, id)
+		reader.use {
+			val serverInfoJson = gson.fromJson<ServerInfoJson>(it, ServerInfoJson::class.java)
+			if (serverInfoJson != null) {
+				val server = serverInfoJson.server
+				if (server != null) {
+					return serverInfoJson
+				}
+				val sites = serverInfoJson.sites
+				if (sites != null && sites.isNotEmpty()) {
+					val site = sites[0]
+					val siteUrl = HttpUrl.Builder().scheme("http").host(site).addPathSegment("Serv.php").build()
+					return getServerInfo(siteUrl, serverID, id)
+				}
 			}
 		}
 
@@ -157,7 +150,7 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 				.build()
 
 		val serverJson = infoJson?.server ?: throw IllegalArgumentException("serverJson == null")
-		val serviceJson = infoJson?.service ?: throw IllegalArgumentException("serviceJson == null")
+		val serviceJson = infoJson.service ?: throw IllegalArgumentException("serviceJson == null")
 		val port = serviceJson.port
 		val externalPort = serviceJson.ext_port
 
@@ -173,8 +166,8 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 
 				if (iface.ipv6 != null) {
 					for (ipv6 in iface.ipv6) {
-						val Ipv6Address = "[${ipv6.address}]"
-						internalService.submit(newPingCallable(client, Ipv6Address, port))
+						val ipv6Address = "[${ipv6.address}]"
+						internalService.submit(newPingCallable(client, ipv6Address, port))
 						internalCount.incrementAndGet()
 					}
 				}
@@ -316,16 +309,10 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 					.url(pingPongUrl)
 					.build()
 			val response = client.newCall(request).execute()
-			var reader: Reader? = null
-			try {
-				reader = response.body().charStream()
-				val pingPongJson = gson.fromJson<PingPongJson>(reader, PingPongJson::class.java)
+			response.body().charStream().use {
+				val pingPongJson = gson.fromJson<PingPongJson>(it, PingPongJson::class.java)
 				if (pingPongJson != null && pingPongJson.success) {
 					return@Callable host
-				}
-			} finally {
-				if (reader != null) {
-					reader.close()
 				}
 			}
 			null
@@ -333,9 +320,7 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 	}
 
 	fun requestTunnel(infoJson: ServerInfoJson?, serverID: String, id: String): ServerInfoJson? {
-		if (infoJson == null
-		    || infoJson.env == null
-		    || Util.isEmpty(infoJson.env.control_host)) {
+		if (infoJson?.env == null || Util.isEmpty(infoJson.env.control_host)) {
 			return null
 		}
 
@@ -356,14 +341,8 @@ class QuickConnectResolver(val requestUrl: HttpUrl) {
 				.post(requestBody)
 				.build()
 		val response = client.newCall(request).execute()
-		var reader: Reader? = null
-		try {
-			reader = response.body().charStream()
-			return gson.fromJson<ServerInfoJson>(reader, ServerInfoJson::class.java)
-		} finally {
-			if (reader != null) {
-				reader.close()
-			}
+		response.body().charStream().use {
+			return gson.fromJson<ServerInfoJson>(it, ServerInfoJson::class.java)
 		}
 	}
 }
