@@ -1,22 +1,16 @@
 package me.oldjing.quickconnect.store
 
-import java.util.*
-
 class InMemoryRelayStore : RelayStore {
 
 	// In memory
-	val allCookies: HashMap<String, RelayCookie>
-
-	init {
-		allCookies = HashMap<String, RelayCookie>()
-	}
+	private val allCookies= mutableMapOf<String, RelayCookie>()
 
 	override fun add(serverID: String, relayCookie: RelayCookie) {
-		var targetCookie = allCookies[serverID]
+		val targetCookie = allCookies[serverID]
 		if (targetCookie != null) {
 			allCookies.remove(serverID)
 		}
-		allCookies.put(serverID, relayCookie);
+		allCookies[serverID] = relayCookie;
 	}
 
 	override fun get(serverID: String): RelayCookie {
