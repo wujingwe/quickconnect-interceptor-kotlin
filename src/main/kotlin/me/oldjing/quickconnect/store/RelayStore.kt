@@ -1,11 +1,11 @@
 package me.oldjing.quickconnect.store
 
 interface RelayStore {
-	fun add(serverID: String, relayCookie: RelayCookie)
+  fun add(serverID: String, relayCookie: RelayCookie)
 
-	fun get(serverID: String): RelayCookie
+  fun get(serverID: String): RelayCookie
 
-	fun remove(serverID: String)
+  fun remove(serverID: String)
 
-	fun removeAll()
+  fun removeAll()
 }
