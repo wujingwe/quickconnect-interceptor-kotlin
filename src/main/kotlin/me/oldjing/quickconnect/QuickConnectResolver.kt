@@ -7,7 +7,7 @@ import me.oldjing.quickconnect.store.RelayHandler
 import me.oldjing.quickconnect.store.RelayManager
 import me.oldjing.quickconnect.json.PingPongJson
 import me.oldjing.quickconnect.json.ServerInfoJson
-import me.oldjing.quickconnect.json.ServerInfoJson.ServiceJson
+import me.oldjing.quickconnect.json.ServiceJson
 import okhttp3.*
 import okhttp3.OkHttpClient.Builder
 import java.io.IOException

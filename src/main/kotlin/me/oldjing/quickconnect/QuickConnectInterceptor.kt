@@ -58,7 +58,7 @@ class QuickConnectInterceptor : Interceptor {
         .build()
       request = request.newBuilder()
         .url(url)
-        .build();
+        .build()
       println("Resolved url: $url")
     }
     return chain.proceed(request)

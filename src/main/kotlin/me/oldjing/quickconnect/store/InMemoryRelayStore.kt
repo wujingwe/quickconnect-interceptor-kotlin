@@ -10,7 +10,7 @@ class InMemoryRelayStore : RelayStore {
 		if (targetCookie != null) {
 			allCookies.remove(serverID)
 		}
-		allCookies[serverID] = relayCookie;
+		allCookies[serverID] = relayCookie
 	}
 
 	override fun get(serverID: String): RelayCookie {

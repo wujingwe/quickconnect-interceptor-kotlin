@@ -3,7 +3,7 @@ package me.oldjing.quickconnect.store
 abstract class RelayHandler {
 
 	companion object {
-		var instance: RelayHandler? = null
+		private var instance: RelayHandler? = null
 
 		fun getDefault(): RelayHandler? {
 			return instance

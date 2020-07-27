@@ -2,11 +2,11 @@ import com.google.gson.Gson
 import me.oldjing.quickconnect.QuickConnectResolver
 import me.oldjing.quickconnect.json.PingPongJson
 import me.oldjing.quickconnect.json.ServerInfoJson
-import me.oldjing.quickconnect.json.ServerInfoJson.EnvJson
-import me.oldjing.quickconnect.json.ServerInfoJson.ServerJson
-import me.oldjing.quickconnect.json.ServerInfoJson.ServiceJson
-import me.oldjing.quickconnect.json.ServerInfoJson.ServerJson.ExternalJson
-import me.oldjing.quickconnect.json.ServerInfoJson.ServerJson.InterfaceJson
+import me.oldjing.quickconnect.json.EnvJson
+import me.oldjing.quickconnect.json.ExternalJson
+import me.oldjing.quickconnect.json.InterfaceJson
+import me.oldjing.quickconnect.json.ServerJson
+import me.oldjing.quickconnect.json.ServiceJson
 import me.oldjing.quickconnect.store.RelayHandler
 import me.oldjing.quickconnect.store.RelayManager
 import okhttp3.mockwebserver.MockResponse
