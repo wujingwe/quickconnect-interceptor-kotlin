@@ -36,9 +36,10 @@ compile project (':quickconnect')
 
 - Add QuickConnectInterceptor when creating OkHttpClient
 ```kotlin
-val client = OkHttpClient.Builder()
-				.addInterceptor(QuickConnectInterceptor())
-				.build()
+val client = 
+    OkHttpClient.Builder()
+        .addInterceptor(QuickConnectInterceptor())
+        .build()
 ```
 
 - Send a request to Synology NAS server. 
@@ -46,9 +47,10 @@ To use QuickConnect, you need to have a QuickConnect ID. To compose a HTTP reque
 For example, if your QuickConnect ID is "**dsm**" and want to send a pingpong request(webman/pingpong.cgi?action=cors), the request should be looked like:
 ```kotlin
 val quickConnectId = "dsm"
-val request = Request.Builder()
-				.url(HttpUrl.parse("http://$quickConnectId/webman/pingpong.cgi?action=cors"))
-				.build();
+val request = 
+    Request.Builder()
+        .url(HttpUrl.parse("http://$quickConnectId/webman/pingpong.cgi?action=cors"))
+        .build();
 client.newCall(request).execute();
 ```
 
